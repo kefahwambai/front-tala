@@ -88,34 +88,24 @@ export const ForgotPassword = (user) => async (dispatch) => {
   }
 };
 
-// export const Feedback = (user) => async (dispatch) => {
-//   const { name, email, message } = user;
-//   const res = await csrfFetch("/feedback", {
-//     method: "POST",
-//     body: JSON.stringify({
-//       name,
-//       email,
-//       message,
-      
-//     })
-//   });
-//   console.log("Response status:", res.status);
-//   const text = await res.text();
-//   console.log("Response text:", text);
-
-//   const data = await res.json();
-//   console.log("Response JSON data:", data);
-
-//   return res;
-// };
 
 export const restoreSession = () => async (dispatch) => {
-    const res = await csrfFetch("api/session");
+  try {
+    const res = await csrfFetch("api/session");    
+    if (!res.ok) {    
+      throw new Error('Failed to fetch session');
+    }
+    
     storeCSRFToken(res);
     const data = await res.json();
     storeCurrentUser(data.name);
     dispatch(setCurrentUser(data.name));
     return res;
+  } catch (error) {   
+    console.error('Error restoring session:', error);
+   
+    throw error;
+  }
 };
 
 const initialState = { 
