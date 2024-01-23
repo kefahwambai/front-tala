@@ -66,7 +66,7 @@ export default function SignUp({ setUser }) {
           setUser(user)                    
           setMessage('Account Created');
           setTimeout(() => {
-            navigate('/clients');
+            navigate('/login');
           }, 1234);
         } else {
           setSignupError(user.error);

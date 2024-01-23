@@ -29,6 +29,9 @@ function AddClientForm({ user }) {
     try {
       const response = await fetch('http://localhost:3000/clients', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
         
       });
