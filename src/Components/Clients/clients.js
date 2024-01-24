@@ -52,7 +52,7 @@ export default function Clients({ user }) {
   }, [token]);
 
   const handleViewLoans = (client) => {
-    fetch('http://localhost:3000/loans', {
+    fetch(`http://localhost:3000/loans?client_id=${client.id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -64,13 +64,15 @@ export default function Clients({ user }) {
         return response.json();
       })
       .then((data) => {
-        const clientLoans = data.filter((loan) => loan.client_id === client.id);
-        setClientLoans(clientLoans);
-        setSelectedClient(client.id);
+        setClientLoans(data);
+        setSelectedClient(client.id);     
         setOpenModal(true);
       })
       .catch((error) => console.error('API Error:', error));
   };
+  
+  
+  
 
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -79,7 +81,7 @@ export default function Clients({ user }) {
   const defaultTheme = createTheme();
 
   const handleLoanPaid = (loanId) => {
-    fetch(`https://topacash.onrender.com/loans/${loanId}`, {
+    fetch(`http://localhost:3000/loans/${loanId}`, {
       method: 'DELETE',
     })
       .then((response) => {

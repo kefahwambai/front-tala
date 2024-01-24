@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
 
 
-function LoanForm() {
+function LoanForm({ user }) {
   const [amount, setAmount] = useState('');
   const [interest_rate, setInterestRate] = useState('');
   const [start_date, setStartDate] = useState('');
@@ -14,28 +14,46 @@ function LoanForm() {
   const [error, setError] = useState(null);
   const [interest_amount, setInterestAmount] = useState('');
   const navigate = useNavigate();
+  const token = sessionStorage.getItem('jwt');
+//   console.log(token)
 
   useEffect(() => {
-    fetch('http://localhost:3000/clients')
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error('Network response was not ok');
+    const fetchData = async () => {
+      try {
+        if (token) {
+          const clientsResponse = await fetch('http://localhost:3000/clients', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!clientsResponse.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          const clientsData = await clientsResponse.json();
+          setClients(clientsData);
         }
-        return resp.json();
-      })
-      .then((data) => {
-        // console.log('Client data:', data);
-        setClients(data);
-      })
-      .catch((error) => {
-        setError(error.message);
-      });
-  }, []);
+      } catch (error) {
+        console.error('API Error:', error);
+      }
+    };
+
+    fetchData();
+  }, [token]);
+
+  useEffect(() => {
+    const calculateInterest = () => {
+      const calculatedInterest = (amount * interest_rate) / 100;
+      setInterestAmount(calculatedInterest);
+    };
+
+    calculateInterest();
+  }, [amount, interest_rate]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    // Create a FormData object
+
+    e.preventDefault();  
     const loanData = new FormData();
     loanData.append('amount', amount);
     loanData.append('interest_rate', interest_rate);
@@ -46,6 +64,9 @@ function LoanForm() {
     try {
       const response = await fetch('http://localhost:3000/loans', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: loanData,
       });
   
@@ -55,7 +76,7 @@ function LoanForm() {
   
       setMessage('Loan Created!');
       setTimeout(() => {
-        navigate('/clients');
+        navigate('/clientlist');
       }, 1234);
   
       setAmount('');
@@ -85,16 +106,16 @@ function LoanForm() {
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              required // Add validation here
+              required
             />
           </Form.Group>
           <Form.Group controlId="interest_rate">
-            <Form.Label>Interest Rate:</Form.Label>
+            <Form.Label>Interest Rate (%):</Form.Label>
             <Form.Control
               type="number"
               value={interest_rate}
               onChange={(e) => setInterestRate(e.target.value)}
-              required // Add validation here
+              required 
             />
           </Form.Group>
           <Form.Group controlId="interest_amount">
@@ -103,7 +124,8 @@ function LoanForm() {
               type="number"
               value={interest_amount}
               onChange={(e) => setInterestAmount(e.target.value)}
-              required // Add validation here
+              required 
+              readOnly
             />
           </Form.Group>
           <Form.Group controlId="start_date">
