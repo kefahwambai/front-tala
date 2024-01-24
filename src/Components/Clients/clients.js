@@ -104,7 +104,7 @@ export default function Clients({ user }) {
 
   return (
     <div>
-      <Container sx={{ py: 15 }} maxWidth="md">
+      <Container sx={{ py: 17.7 }} maxWidth="md">
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
